@@ -10,10 +10,6 @@ import datetime
 import time
 import uuid
 
-ip = 'localhost'
-port = '60051'
-s_uuid = str(uuid.uuid5(uuid.NAMESPACE_DNS, f'{ip}:{port}'))
-
 
 def register_seller(channel):
     stub = protos_pb2_grpc.MarketServiceStub(channel)
@@ -174,4 +170,10 @@ def serve():
         
         
 if __name__ == '__main__':
+    global ip, port, s_uuid
+    
+    ip = input("Enter your IP: ")
+    port = input("Enter your port: ")
+    s_uuid = str(uuid.uuid5(uuid.NAMESPACE_DNS, f'{ip}:{port}'))
+    
     serve()

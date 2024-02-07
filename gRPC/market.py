@@ -473,14 +473,18 @@ class MarketServicer(protos_pb2_grpc.MarketServiceServicer):
             context.set_code(grpc.StatusCode.OK)
             return protos_pb2.RateItemResponse(status="FAILURE")
 
-server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-protos_pb2_grpc.add_MarketServiceServicer_to_server(MarketServicer(), server)
+if __name__ == '__main__':
 
-server.add_insecure_port('localhost:50051')
-server.start()
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10)) 
+    protos_pb2_grpc.add_MarketServiceServicer_to_server(MarketServicer(), server)
+    server.add_insecure_port('localhost:50051') # Adding the custom "localhost:50051" address for the market to run on it
+    server.start()
 
-try:
-    while True:
-        time.sleep(86400)
-except KeyboardInterrupt:
-    server.stop(0)
+    """
+        Running the market until the user stops it
+    """
+    try:
+        while True:
+            time.sleep(86400)
+    except KeyboardInterrupt:
+        server.stop(0) 
