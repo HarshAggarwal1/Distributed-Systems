@@ -2,132 +2,154 @@ from __future__ import print_function
 import uuid
 import logging
 import zmq
-import grpc
-import article_pb2 
-import article_pb2_grpc
+import protos_pb2
 from google.protobuf.timestamp_pb2 import Timestamp
 import datetime
 
-servers=[]
+groups=[]
 
-def getServers():
-    global servers
-    servers=[]
+def getGroup():
+    global groups
+    groups=[]
+    
     context = zmq.Context()
     socket1 = context.socket(zmq.REQ)
     socket1.connect("tcp://127.0.0.1:50051")
-    socket1.send_string("getser")
+    socket1.send_string("get_grp")
+    
     msg=int(socket1.recv_string())
+    
     for i in range(msg):
         socket1.send_string("")
+        
         msg=socket1.recv()
-        serverObj=article_pb2.Server()
-        serverObj.ParseFromString(msg)
-        servers.append(serverObj)
-    for i in servers:
-        print(str(i))
+        groupObj=protos_pb2.Group()
+        groupObj.ParseFromString(msg)
+        
+        groups.append(groupObj)
     
-def connectServer():
-    print("Currently following servers are active: \n S.no || name || ip || port")
-    sno=0
-    for i in servers:
-        print(sno+1, " || ",i.name, " || ",i.address.ip," || ",i.address.port)
-        sno=sno+1
-    q=int(input("Please choose one of the above server and input it's S.No to connect:"))
-    ip=servers[q-1].address.ip
-    port=servers[q-1].address.port
-    print("Establishingpip install grpcio connection")
-    cid=str(uuid.uuid4())
-    clientObj=article_pb2.Client(uuid=cid)
+    for i in groups:
+        print(f'{datetime.datetime.now()}: {str(i)}')
+    
+def connectGroup():
+    print(f"{datetime.datetime.now()}: Currently following group are active")
+    count = 1
+    for i in groups:
+        print(count, " || ", i.name, " || ", i.address.ip, " || ", i.address.port)
+        count += 1
+        
+    q=int(input("Enter the group number to connect: "))
+    
+    ip = groups[q-1].address.ip
+    port = groups[q-1].address.port
+    
+    print(f"{datetime.datetime.now()}: Connecting to the group at {ip}:{port}")
+    
+    cid = str(uuid.uuid4())
+    clientObj = protos_pb2.Client(uuid = cid)
+    
     context = zmq.Context()
     socket1 = context.socket(zmq.REQ)
     socket1.connect("tcp://127.0.0.1:"+str(port))
-    socket1.send_string("conser")
-    msg=socket1.recv_string()
-    print(msg)
+    socket1.send_string("con_grp")
+    
+    msg = socket1.recv_string()
+    
+    print(f"{datetime.datetime.now()}: {msg}")
+    
     socket1.send_string(cid)
-    msg=socket1.recv_string()
-    print(msg)
+    msg = socket1.recv_string()
+    
+    print(f"{datetime.datetime.now()}: {msg}")
+    
     return [port,cid,clientObj]
 
-def disconnectServer(port,clientObj):
+def disconnectGroup(port,clientObj):
     context = zmq.Context()
     socket1 = context.socket(zmq.REQ)
-    socket1.connect("tcp://127.0.0.1:"+str(port))
-    socket1.send_string("disconser")
+    socket1.connect("tcp://127.0.0.1:"+ str(port))
+    socket1.send_string("discon_grp")
+    
     msg=socket1.recv_string()
-    print(msg)
+    print(f"{datetime.datetime.now()}: {msg}")
+    
     socket1.send_string(clientObj)
-    msg=socket1.recv_string()
-    print(msg)
+    msg = socket1.recv_string()
+    print(f"{datetime.datetime.now()}: {msg}")
 
-def publishArticle(port,clientObj):
-    auth=input("enter the name of Author:")
-    mtype=input("Choose. \n sports, fassion or politics:")
+def sendMessage(port,clientObj):
     now = datetime.datetime.now()
     timestamp = Timestamp()
-    time=timestamp.FromDatetime(now)
-    print(time)
-    content=input("Enter the article content:")
-    ad=article_pb2.Article(author=auth,type=mtype,time=time,content=content)
-    pubreq=article_pb2.PublishRequest(client=clientObj,article=ad)
+    time = timestamp.FromDatetime(now)
+    
+    content = input("Enter your message: ")
+    
+    ad=protos_pb2.Message(time=time, content=content)
+    
+    pubreq=protos_pb2.SendRequest(client=clientObj,message=ad)
+    
     context = zmq.Context()
     socket1 = context.socket(zmq.REQ)
     socket1.connect("tcp://127.0.0.1:"+str(port))
-    socket1.send_string("pubart")
-    msg=socket1.recv_string()
-    print(msg)
+    socket1.send_string("send_msg")
+    
+    msg = socket1.recv_string()
+    print(f"{datetime.datetime.now()}: {msg}")
+    
     socket1.send(ad.SerializeToString())
     msg=socket1.recv_string()
-    print(msg)
+    print(f"{datetime.datetime.now()}: {msg}")
 
-def getArticles(port):
-    auth=input("enter the name of Author:")
-    mtype=input("Choose. \n sports, fassion or politics:")
-    time_str=input("Enter the date in YY-mm-dd format:")
+def getMessage(port):
+    time_str=input("Enter the date in YY-mm-dd format: ")
     dtime=datetime.datetime.strptime(time_str,'%Y-%m-%d')
     timestamp = Timestamp()
     timestamp.FromDatetime(dtime)
-    artreq=article_pb2.ArticleRequest(author=auth,type=mtype,time=timestamp)
+    
+    artreq=protos_pb2.MessageRequest(time=timestamp)
+    
     context = zmq.Context()
     socket1 = context.socket(zmq.REQ)
     socket1.connect("tcp://127.0.0.1:"+str(port))
-    socket1.send_string("getart")
+    socket1.send_string("get_msg")
+    
     msg=int(socket1.recv_string())
+    
     for i in range(msg):
         socket1.send_string("")
         msg=socket1.recv()
-        artObj=article_pb2.Article()
+        artObj=protos_pb2.Message()
         artObj.ParseFromString(msg)
         print(str(artObj))
 
 if __name__ == '__main__':
+    
     logging.basicConfig()
     flag=False
     while True:
-        q=input("Press 1 to get all active servers: \n Press 2 to connect to a server \n press 3 to disconnect from a server \n press 4 to publish an article to a server \n press 5 to get articles \n and press 0 to quit")
+        q=input("1. Get all active groups \n2. Connect to a group \n3. Disconnect from a group \n4. Send a message to a group \n5. Get messages \n0. Quit \n\nEnter your choice: ")
         if q=="1":
-            getServers()
+            getGroup()
         elif q=="2":
-            data=connectServer()
+            data=connectGroup()
             flag=True
         elif q=="3":
             if flag:
-                disconnectServer(data[0],data[1])
+                disconnectGroup(data[0],data[1])
                 flag=False
             else:
-                print("Alert, You have not joined any server")
+                print("Alert, You have not joined any group")
             #break
         elif q=="4":
             if flag:
-                publishArticle(data[0],data[2])
+                sendMessage(data[0],data[2])
             else:
-                print("Alert, Please connect to a server first.")
+                print("Alert, Please connect to a group first.")
         elif q=="5":
             if flag:
-                getArticles(data[0])
+                getMessage(data[0])
             else:
-                print("Alert, First connect to a server. ")
+                print("Alert, First connect to a group. ")
         else:
             break
     

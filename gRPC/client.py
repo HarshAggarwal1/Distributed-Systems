@@ -132,7 +132,7 @@ def run():
         Returns:
             None
     """
-    with grpc.insecure_channel("localhost:50051") as channel:
+    with grpc.insecure_channel("34.131.57.38:50051") as channel:
         response = register_buyer(channel=channel)
         
         if (not response):

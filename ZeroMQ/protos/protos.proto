@@ -19,9 +19,9 @@ message Client{
     optional string uuid=1;
 }
 
-message PublishRequest{
+message SendRequest{
     optional Client client=1;
-    optional Article article=2;
+    optional Message message=2;
 }
 
 message Status{
@@ -33,24 +33,24 @@ message Status{
 }
 
 message Address{
-    optional string ip=2;
-    optional int32 port=3;
+    optional string ip=1;
+    optional int32 port=2;
 }
 
-message Server{
+message Group{
     optional string name=1;
     optional Address address=2;
 }
 
-message RegistryServer{
+message Server{
     
 }
 
 service ArticleService {
-    rpc GetArticles(ArticleRequest) returns (stream Article) {}
-    rpc PublishArticle(PublishRequest) returns(Status) {}
-    rpc GetServers(RegistryServer) returns(stream Server) {}
-    rpc RegisterServer(Server) returns (Status) {}
-    rpc ConnectToServer(Client) returns(Status) {}
-    rpc DisconnectFromServer(Client) returns(Status) {}
+    rpc GetMessages(MessageRequest) returns (stream Message) {}
+    rpc SendMessage(SendRequest) returns(Status) {}
+    rpc GetGroups(Server) returns(stream Group) {}
+    rpc RegisterGroup(Group) returns (Status) {}
+    rpc ConnectToGroup(Client) returns(Status) {}
+    rpc DisconnectFromGroup(Client) returns(Status) {}
 }
