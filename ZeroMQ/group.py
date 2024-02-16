@@ -6,16 +6,54 @@ clientList=[]
 msgList=[]
 
 def sendMessage(msg):
+    """
+        This function is used to send a message to the group.
+        
+        Args:
+            msg (protos_pb2.Message): Message object.
+            
+        Returns:
+            None
+    """
     msgList.append(msg)
 
 def disconnectGroup(msg):
+    """
+        This function is used to disconnect a client from the group.
+        
+        Args:
+            
+            msg (str): Client name.
+            
+        Returns:
+            None
+    """
     if msg in clientList:
         clientList.remove(msg)
 
 def connectGroup(msg):
+    """
+        This function is used to connect a client to the group.
+        
+        Args:
+            msg (str): Client name.
+            
+        Returns:
+            None
+    """
     clientList.append(msg)
 
 def serve(name, port):
+    """
+        This function is used to start the server.
+        
+        Args:
+            name (str): Name of the group.
+            port (str): Port number.
+            
+        Returns:
+            None
+    """
     context = zmq.Context()
     
     addr = protos_pb2.Address(ip="127.0.0.1",port=int(port))

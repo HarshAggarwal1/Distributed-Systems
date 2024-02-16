@@ -9,6 +9,15 @@ import datetime
 groups=[]
 
 def getGroup():
+    """
+        This function is used to get all the active groups from the server.
+
+        Args:
+            None
+            
+        Returns:
+            None
+    """
     global groups
     groups=[]
     
@@ -32,6 +41,15 @@ def getGroup():
         print(f'{datetime.datetime.now()}: {str(i)}')
     
 def connectGroup():
+    """
+        This function is used to connect to a group.
+        
+        Args:
+            None
+            
+        Returns:
+            list: [port,cid,clientObj]
+    """
     print(f"{datetime.datetime.now()}: Currently following group are active")
     count = 1
     for i in groups:
@@ -65,6 +83,16 @@ def connectGroup():
     return [port,cid,clientObj]
 
 def disconnectGroup(port,clientObj):
+    """
+        This function is used to disconnect from a group.
+        
+        Args:
+            port (int): Port number of the group.
+            clientObj (protos_pb2.Client): Client object.
+            
+        Returns:
+            None
+    """
     context = zmq.Context()
     socket1 = context.socket(zmq.REQ)
     socket1.connect("tcp://127.0.0.1:"+ str(port))
@@ -78,6 +106,16 @@ def disconnectGroup(port,clientObj):
     print(f"{datetime.datetime.now()}: {msg}")
 
 def sendMessage(port,clientObj):
+    """
+        This function is used to send a message to a group.
+        
+        Args:
+            port (int): Port number of the group.
+            clientObj (protos_pb2.Client): Client object.
+            
+        Returns:
+            None
+    """
     now = datetime.datetime.now()
     timestamp = Timestamp()
     time = timestamp.FromDatetime(now)
@@ -101,8 +139,17 @@ def sendMessage(port,clientObj):
     print(f"{datetime.datetime.now()}: {msg}")
 
 def getMessage(port):
-    time_str=input("Enter the date in YY-mm-dd format: ")
-    dtime=datetime.datetime.strptime(time_str,'%Y-%m-%d')
+    """
+        This function is used to get messages from a group.
+        
+        Args:
+            port (int): Port number of the group.
+            
+        Returns:
+            None
+    """
+    time_str=input("Enter the date in HH:MM::SS format: ")
+    dtime=datetime.datetime.strptime(time_str,'%H-%M-%S')
     timestamp = Timestamp()
     timestamp.FromDatetime(dtime)
     

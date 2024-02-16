@@ -5,9 +5,27 @@ import protos_pb2
 groupList=[]
 
 def registerServer(groupData):
+    """
+        This function is used to register a group to the registry server.
+        
+        Args:
+            groupData (protos_pb2.Group): Group object.
+            
+        Returns:
+            None
+    """
     groupList.append(groupData)
 
 def serve():
+    """
+        This function is used to start the server.
+        
+        Args:
+            None
+            
+        Returns:
+            None
+    """
     context = zmq.Context()
     
     socket = context.socket(zmq.REP)
