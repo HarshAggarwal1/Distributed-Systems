@@ -84,6 +84,7 @@ def serve(name, port):
         msg=socket.recv_string()
         
         if msg=="con_grp":
+            print("Processing connectGroup")
             socket.send_string("Processing connectGroup")
             
             res=socket.recv_string()
@@ -92,6 +93,7 @@ def serve(name, port):
             socket.send_string("Client got connected")
             
         if msg=="discon_grp":
+            print("Processing disconnectGroup")
             socket.send_string("Processing disconnectGroup")
             
             res=socket.recv_string()
@@ -100,6 +102,7 @@ def serve(name, port):
             socket.send_string("Client got disconnected")
         
         if msg=="send_msg":
+            print("Processing sendMessage")
             socket.send_string("Processing sendMessage")
             
             msgData=socket.recv()
@@ -110,6 +113,7 @@ def serve(name, port):
             socket.send_string("Sent Message Successfully")
         
         if msg=="get_msg":
+            print("Processing getMessages")
             socket.send_string(str(len(msgList)))
             
             for i in msgList:
